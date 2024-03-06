@@ -5,9 +5,13 @@ To install the knoty Module simply copy the "knoty" folder into the directory co
 
 ## Dependencies
 Matplotlib
+
 Numpy
+
 Sympy
+
 SvgPathTools
+
 
 # Basic Usage
 
