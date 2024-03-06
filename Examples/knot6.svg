@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="10mm"
+   height="10mm"
+   viewBox="0 0 10 10"
+   version="1.1"
+   id="svg1"
+   inkscape:export-filename="knot6.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1"
+       d="m 0.62286646,3.6639203 c 0.97093884,4e-7 1.35565054,-1.9235583 2.19835224,-1.9601972 0.8427016,-0.036639 1.1174957,1.4472484 2.015156,1.4472484 0.8976606,0 1.8319603,-1.3922898 2.6197032,-1.3922898 0.7877429,0 1.1907741,1.5754856 1.9418778,1.5938054"
+       id="path1"
+       sodipodi:nodetypes="csssc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1"
+       d="M 0.62286646,3.8104771 C 1.4106094,3.8287971 2.619703,5.477561 3.3891263,5.477561 c 0.7694232,0 2.986095,-1.9785171 3.627281,-2.0334758"
+       id="path2"
+       sodipodi:nodetypes="csc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1"
+       d="M 7.0347269,3.4074457 C 6.4668194,3.444085 5.660757,1.9785171 5.05621,1.9601973 4.4516633,1.9418776 3.2425694,3.3891264 2.8212186,3.3708066"
+       id="path3"
+       sodipodi:nodetypes="csc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1"
+       d="m 2.7662598,3.3891263 c 0.7511036,0 2.1983523,1.9601972 3.2975283,1.9601972 1.0991763,0 2.7845794,-1.9235581 3.2425694,-1.9601971"
+       id="path4"
+       sodipodi:nodetypes="csc" />
+  </g>
+</svg>

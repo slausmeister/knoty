@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="10mm"
+   height="10mm"
+   viewBox="0 0 10 10"
+   version="1.1"
+   id="svg1"
+   inkscape:export-filename="knot7.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1"
+       d="M 0.51294884,4.5432612 C 1.6854033,4.5249414 1.9418777,3.3524871 2.7296205,3.3341675 3.5173634,3.315848 4.1219104,4.5432612 4.8180553,4.5249415 5.5142,4.5066217 6.3202625,3.2792087 7.0347269,3.3158479 7.7491913,3.3524871 8.3354187,4.176869 9.1231616,4.1951887"
+       id="path4"
+       sodipodi:nodetypes="csssc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1"
+       d="M 9.1598008,4.231828 C 8.3720579,4.2135082 7.4194386,4.9646119 6.943129,4.9646119 6.4668192,4.9646119 5.8805919,3.590642 5.331004,3.5723222 4.781416,3.5540022 3.0593733,4.5799004 2.436507,4.5799004"
+       id="path5"
+       sodipodi:nodetypes="cssc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1"
+       d="M 9.068203,5.5141999 C 8.6834911,5.5508391 7.2912015,4.2684672 6.8698507,4.2501475 6.2365759,4.2226135 3.7536101,6.0955275 2.8944969,6.1187469 2.2166718,6.1370667 1.0991761,4.6531788 0.54958806,4.5799003"
+       id="path7"
+       sodipodi:nodetypes="cssc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1"
+       d="m 2.4548266,4.5615807 c 1.2274132,0.01832 2.7845796,1.337331 3.499044,1.3739702 0.7144644,0.036639 2.1983522,-0.5495882 3.0227341,-0.3847117"
+       id="path8"
+       sodipodi:nodetypes="csc" />
+  </g>
+</svg>
