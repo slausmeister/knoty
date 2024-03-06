@@ -101,4 +101,13 @@ knoty.plot_planes_along_knot(ax, knot)
 ![Alt text](/ReadmeImages/2.png?raw=true)
 ## Specifying knots through SVGs
 
-A full example can be seen in the jupyter notebook attached.
+A full example can be seen in the jupyter notebook attached. Example SVGs and a template can be found in Examples.
+
+# TODO
+
+- Full documentation for SVG import
+- Calculating TB
+- Fixing scaling issues in SVG import
+- Fixing Jumping issues in sp.Piecewise in SVG import
+- Publishing to pip
+- Full in code documentation
