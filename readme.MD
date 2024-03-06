@@ -65,7 +65,7 @@ form = [0, 'x', 1]
 
 knoty.plot_contact_structure(ax, form=form, alpha = 1)
 ```
-![Alt text](/relative/path/to/1.png?raw=true
+![Alt text](/ReadmeImages/1.png?raw=true
 The argument form specifies the form. If no form is given, then the function defaults to the standard contact form. The argument alpha sets the transparency of the contact planes and defaults to 0.5.
 
 ## Visualizing Legendre Knots
@@ -88,7 +88,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 knoty.plot_knot(ax, knot)
 ```
-![Alt text](/relative/path/to/3.png?raw=true
+![Alt text](/ReadmeImages/3.png?raw=true
 We can also plot contact planes along the knot through the knoty.plot_planes_along_knot() function. It again takes in the 3D plot and the knot equation. Additionally we can layer everything onto a single plot. For example we could visualize the standard contact structure, plot the knot and indicate the contact planes in one 3D plot through the following code:
 
 ```python
@@ -98,7 +98,7 @@ knoty.plot_contact_structure(ax)
 knoty.plot_knot(ax, knot)
 knoty.plot_planes_along_knot(ax, knot)
 ```
-![Alt text](/relative/path/to/2.png?raw=true
+![Alt text](/ReadmeImages/2.png?raw=true
 ## Specifying knots through SVGs
 
 A full example can be seen in the jupyter notebook attached.
