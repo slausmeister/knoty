@@ -4,13 +4,10 @@ The goal of this Python Module is to provide an interactive framework for the vi
 To install the knoty Module simply copy the "knoty" folder into the directory containing your Python file. Make sure, that all dependencies are installed.
 
 ## Dependencies
-Matplotlib
-
-Numpy
-
-Sympy
-
-SvgPathTools
+- Matplotlib
+- Numpy
+- Sympy
+- SvgPathTools
 
 
 # Basic Usage
