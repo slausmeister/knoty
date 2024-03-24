@@ -1,6 +1,6 @@
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 import sympy as sp
+import k3d
 
 def get_basis(matrix, x_val, y_val, z_val):
     """
@@ -21,7 +21,7 @@ def get_basis(matrix, x_val, y_val, z_val):
 
     # Constructing the basis vectors
     basis1 = np.array([1, 0, -a/c], dtype=object) if c != 0 else np.array([1, 0, 0], dtype=object)
-    basis2 = np.array([0, 1, -b/c], dtype=object) if c != 0 else np.array([0, 1, 0], dtype=object)
+    basis2 = np.array([0, 1, -b/c], dtype=object) if c != 0 else np.array([0 , 1, 0], dtype=object)
 
     # Function to substitute values into a symbolic expression or return the value if it's not symbolic
     def substitute_if_symbolic(expr, substitutions):
@@ -33,40 +33,46 @@ def get_basis(matrix, x_val, y_val, z_val):
     basis2_evaluated = np.array([substitute_if_symbolic(el, substitutions) for el in basis2], dtype=float)
 
     return basis1_evaluated, basis2_evaluated
-
-def plot_plane(ax, x, y, z, form, size, height_limit, alpha, surfcolor='blue'):
+def plot_plane(x, y, z, form, alpha, surfcolor='blue', plot_radius=0.1):
     """
-    This function draws a hyperplane at a point as to indicate the contact structure
-
-    :ax: A 3D matplotlib plot# x, y, z: Coordinates in R3
-    :form: A one form
-    :size: Defines the extend of the plane indicating the contact structure
-    :height_limit: Limits the vertical extend of the planes, as to make the picture less convoluted
-    :surfacecolor: Sets the color of the plane
-    :alpha: Sets the transperancy of the plane
+    Plots a surface in R3 at a specific coordinate (x, y, z) spanned by two vectors (v1, v2) using K3D-Jupyter.
+    
+    Parameters:
+    - x, y, z: The coordinates where the surface originates.
+    - v1, v2: The vectors spanning the surface.
+    - plot_radius: The half-length of the sides of the surface.
+    - height_limit: The maximum height variation allowed from the center.
+    - surfcolor: The color of the surface (in hexadecimal).
+    - alpha: The transparency of the surface.
     """
+
     v1, v2 = get_basis(form, x, y, z)
 
     # Create a grid on the plane
-    u, v = np.meshgrid(np.linspace(-size, size, 10), np.linspace(-size, size, 10))
+    u, v = np.meshgrid(np.linspace(-plot_radius, plot_radius, 2), np.linspace(-plot_radius, plot_radius, 2))
     plane_x = x + u * v1[0] + v * v2[0]
     plane_y = y + u * v1[1] + v * v2[1]
     plane_z = z + u * v1[2] + v * v2[2]
 
-
-    plane_x = np.array(plane_x, dtype = float)
-    plane_y = np.array(plane_y, dtype = float)
-    plane_z = np.array(plane_z, dtype = float)
-
-
-    # Clipping the z-values to be within the height_limit
-    plane_z = np.clip(plane_z, z - height_limit/2, z + height_limit/2)
+    # Clip the z-values to be within the height_limit
     
+    # Flatten the x, y, z coordinates for K3D
+    vertices = np.vstack([plane_x.ravel(), plane_y.ravel(), plane_z.ravel()]).T.astype(np.float32)
+    
+    # Generate indices for the triangles
+    indices = []
+    for i in range(vertices.shape[0] - np.sqrt(vertices.shape[0]).astype(int) - 1):
+        if (i + 1) % np.sqrt(vertices.shape[0]).astype(int) != 0:
+            indices.append([i, i + 1, i + np.sqrt(vertices.shape[0]).astype(int)])
+            indices.append([i + 1, i + 1 + np.sqrt(vertices.shape[0]).astype(int), i + np.sqrt(vertices.shape[0]).astype(int)])
+    indices = np.array(indices).astype(np.uint32)
+    
+    # Plot the surface 
 
-    # Plot the plane
-    ax.plot_surface(plane_x, plane_y, plane_z, color=surfcolor, alpha=alpha)
+    tmp = k3d.mesh(vertices, indices, opacity=alpha)
+    return tmp
 
-def plot_contact_structure(ax, form = [0, 'x', 1], grid_size = 1.2, step = 0.5, alpha = 0.1, size = None):
+def plot_contact_structure(plot, form = [0, 'x', 1], grid_size = 1.2, step = 0.5, alpha = 0.1, size = None):
     """
     Generates a grid and calles the plot_plane() on each gridpoint. It therefore initialtes the visualization of the CS
 
@@ -81,10 +87,11 @@ def plot_contact_structure(ax, form = [0, 'x', 1], grid_size = 1.2, step = 0.5, 
     height_limit=0.3
     for x in np.arange(-grid_size, grid_size + step, step):
         for y in np.arange(-grid_size, grid_size + step, step):
-            plot_plane(ax, x, y, 0, form, size, height_limit, alpha)
+            plot +=plot_plane(x, y, 0, form, alpha, plot_radius=size)
+    return plot
 
 
-def plot_knot(ax, knot, resolution=200):
+def plot_knot(plot, knot, resolution=200, domain = [0,2 * np.pi]):
     """
     Takes in a 3D matplotlib plot and a sympy equation of a knot and draws the knot onto the plot.
     
@@ -92,7 +99,7 @@ def plot_knot(ax, knot, resolution=200):
     :knot: Function that takes a sympy Symbol and returns a tuple of sympy expressions (x, y, z)
     :resolution: Sets the number of points on which the knot equation is evaluated. Default value is 200
     """
-    linspace = np.linspace(0, 2 * np.pi, resolution)
+    linspace = np.linspace(domain[0], domain[1], resolution)
     x, y, z = [], [], []
     
     # Differentiate between parameterized and drawn knots
@@ -112,9 +119,11 @@ def plot_knot(ax, knot, resolution=200):
             z.append(knot[2].subs(t, tval).evalf())
     
     # Plot the knot
-    ax.plot(x, y, z, color='b')
+    vertices = np.vstack([x,y,z]).T
+    plot += k3d.line(vertices)
+    return plot
 
-def plot_planes_along_knot(ax, knot, n=50, form = [0, 'x', 1], size = 0.1, height_limit = 0.3, alpha = 0.5, color = 'red'):
+def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, height_limit = 0.3, alpha = 0.5, color = 'red', domain = [0,2 * np.pi] ):
     """
     Takes in a 3D matplotlib plot and a sympy equation of a knot and draws contact planes along the knot
 
@@ -123,7 +132,7 @@ def plot_planes_along_knot(ax, knot, n=50, form = [0, 'x', 1], size = 0.1, heigh
     :n: Sets the number of contact planes drawn. Default is 50
     :form: Sets the contact form that isto be visualized. Default is the standard CS on R3
     """
-    linspace = np.linspace(0, 2 * np.pi, n)
+    linspace = np.linspace(domain[0], domain[1], n)
     x, y, z = [], [], []
 
     # Differentiate between parameterized and drawn knots
@@ -144,7 +153,9 @@ def plot_planes_along_knot(ax, knot, n=50, form = [0, 'x', 1], size = 0.1, heigh
 
     # Call plot_plane for these points
     for xi, yi, zi in zip(x,y,z):
-        plot_plane(ax, xi, yi, zi, form, size, height_limit, alpha, surfcolor=color)
+        plot += plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
+
+    return plot
 
 def find_vanishing_cusps(knot):
     """
@@ -170,67 +181,3 @@ def find_vanishing_cusps(knot):
     z = [knot(t)[2].evalf() for t in intersection]
 
     return x, y, z
-
-def calculate_tb(knot):
-    """
-    WIP function. Takes in a knot and calculated its TB invariant. Currently broken.
-    """
-    # Define the symbols
-    t1 = sp.symbols('t1', real=True)
-    t2 = sp.symbols('t2', real=True)
-    
-    # Extract the y and z components of the knot function
-    _, y1, z1 = knot(t1)
-    _, y2, z2 = knot(t2)
-
-    z2 = z2 + 0.1
-
-
-    system = [z2-z1, y2-y1]
-
-
-    
-    # Solve the equations
-    solutions = sp.solve(system)
-
-    print(solutions)
-
-    return solutions
-
-def ot_in_cartesian(x_val, y_val, z_val):
-    # Define symbolic variables
-    x, y, z = sp.symbols('x y z')
-
-    # Express r and theta in terms of x, y, z
-    r = sp.sqrt(x**2 + y**2)
-    theta = sp.atan2(y, x)
-
-    # Calculate the derivatives of theta with respect to x and y
-    dtheta_dx = sp.diff(theta, x)
-    dtheta_dy = sp.diff(theta, y)
-
-    # Components of the differential form in cylindrical coordinates
-    dx_component = r * sp.sin(r) * dtheta_dx
-    dy_component = r * sp.sin(r) * dtheta_dy
-    dz_component = sp.cos(r)
-
-    # Substitute specific values and evaluate each component
-    dx_component_substituted = dx_component.subs({x: x_val, y: y_val, z: z_val}).evalf()
-    dy_component_substituted = dy_component.subs({x: x_val, y: y_val, z: z_val}).evalf()
-    dz_component_substituted = dz_component.subs({x: x_val, y: y_val, z: z_val}).evalf()
-
-    return [dx_component_substituted, dy_component_substituted, dz_component_substituted]
-
-def plot_contact_structure_cylindrical(ax, radius=1.2, radius_step=0.2, angle_step = np.pi / 4, alpha = 1):
-    for r in np.arange(0.2, radius + radius_step, radius_step):
-        for theta in np.arange(0, 2 * np.pi, angle_step):
-            x = r * np.cos(theta)
-            y = r * np.sin(theta)
-
-            # Call the function with Cartesian coordinates
-            ot_values = ot_in_cartesian(x, y, 0)
-
-            size = 0.06
-            height_limit = 0.3
-
-            plot_plane(ax, x, y, 0, ot_values, size, height_limit, alpha)
