@@ -1,4 +1,4 @@
-The goal of this Python Module is to provide an interactive framework for the visualization of Legendre knots. It generates interactive 3D plots of Legendre knots and contact structures. Click [here](stani-stein.com) for an interactive demonstration. 
+The goal of this Python Module is to provide an interactive framework for the visualization of Legendre knots. It generates interactive 3D plots of Legendre knots and contact structures. Click [here](https://www.stani-stein.com) for an interactive demonstration. 
 
 # Installation
 To install the knoty Module simply copy the "knoty" folder into the directory containing your Python file. Make sure, that all dependencies are installed.
