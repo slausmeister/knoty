@@ -55,7 +55,7 @@ def process_segment(segment, num_of_pieces, current_piece):
     # plt.show()
     return x_t, y_t, z_t
 
-def import_from_svg(svg_file, correction=True, threshold=0.1):
+def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=True):
     paths, _ = svg2paths(svg_file)
 
     paths = [path for path in paths if path]
@@ -64,14 +64,105 @@ def import_from_svg(svg_file, correction=True, threshold=0.1):
     last_points = []
     curve_data = []
     num_of_pieces = 0
+    max_left = np.inf
+    max_right = -np.inf
+    max_top = -np.inf
+    max_bottom = np.inf
     t = sp.symbols('t')
 
     # Extract first and last points of each path, including placeholders for empty paths
+    # Furthermore extract all controll points for scaling
     for path in paths:
         first_points.append(path[0].start)
         last_points.append(path[-1].end)
         for segment in path:
+            if segment.start.real < max_left: max_left = segment.start.real
+            if segment.control1.real < max_left: max_left = segment.control1.real
+            if segment.control2.real < max_left: max_left = segment.control2.real
+            if segment.end.real < max_left: max_left = segment.end.real
+
+            if segment.start.real > max_right: max_right = segment.start.real
+            if segment.control1.real > max_right: max_right = segment.control1.real
+            if segment.control2.real > max_right: max_right = segment.control2.real
+            if segment.end.real > max_right: max_right = segment.end.real
+
+            if segment.start.imag < max_bottom: max_bottom = segment.start.imag
+            if segment.control1.imag < max_bottom: max_bottom = segment.control1.imag
+            if segment.control2.imag < max_bottom: max_bottom = segment.control2.imag
+            if segment.end.imag < max_bottom: max_bottom = segment.end.imag
+
+            if segment.start.imag > max_top: max_top = segment.start.imag
+            if segment.control1.imag > max_top: max_top = segment.control1.imag
+            if segment.control2.imag > max_top: max_top = segment.control2.imag
+            if segment.end.imag > max_top: max_top = segment.end.imag
+
             num_of_pieces += 1
+
+    # print(f"Left:  {max_left}")
+    # print(f"Right: {max_right}")
+    # print(f"Top:   {max_top}")
+    # print(f"Bottom {max_bottom}")
+
+    if scaling:
+        hori_correction = 0.5 * (max_right - max_left)
+        vert_correction = 0.5 * (max_top - max_bottom)
+
+        scalar = 1 / max([max_bottom, max_top, max_left, max_right])
+
+        # print(f"Horizontal correction: {hori_correction}")
+        # print(f"Vertical correction: {vert_correction}")
+        # print(f"Scalar: {scalar}")
+        for path in paths:
+            for i in range(len(path)):
+                segment = path[i]
+                start = complex(scalar * (segment.start.real - hori_correction),
+                    scalar * (segment.start.imag - vert_correction))
+
+                control1 = complex(scalar * (segment.control1.real - hori_correction),
+                    scalar * (segment.control1.imag - vert_correction))
+
+                control2 = complex(scalar * (segment.control2.real - hori_correction),
+                    scalar * (segment.control2.imag - vert_correction))
+
+                end = complex(scalar * (segment.end.real - hori_correction),
+                    scalar * (segment.end.imag - vert_correction))
+                
+                path[i] = CubicBezier(start, control1, control2, end)
+
+        max_left = np.inf
+        max_right = -np.inf
+        max_top = -np.inf
+        max_bottom = np.inf
+
+        for path in paths:
+            for segment in path:
+                if segment.start.real < max_left: max_left = segment.start.real
+                if segment.control1.real < max_left: max_left = segment.control1.real
+                if segment.control2.real < max_left: max_left = segment.control2.real
+                if segment.end.real < max_left: max_left = segment.end.real
+
+                if segment.start.real > max_right: max_right = segment.start.real
+                if segment.control1.real > max_right: max_right = segment.control1.real
+                if segment.control2.real > max_right: max_right = segment.control2.real
+                if segment.end.real > max_right: max_right = segment.end.real
+
+                if segment.start.imag < max_bottom: max_bottom = segment.start.imag
+                if segment.control1.imag < max_bottom: max_bottom = segment.control1.imag
+                if segment.control2.imag < max_bottom: max_bottom = segment.control2.imag
+                if segment.end.imag < max_bottom: max_bottom = segment.end.imag
+
+                if segment.start.imag > max_top: max_top = segment.start.imag
+                if segment.control1.imag > max_top: max_top = segment.control1.imag
+                if segment.control2.imag > max_top: max_top = segment.control2.imag
+                if segment.end.imag > max_top: max_top = segment.end.imag
+        
+
+        # print(f"Left:  {max_left}")
+        # print(f"Right: {max_right}")
+        # print(f"Top:   {max_top}")
+        # print(f"Bottom {max_bottom}")
+
+
 
     if correction:
         # Compare and adjust similar start and end points between paths
