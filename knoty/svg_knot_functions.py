@@ -42,9 +42,10 @@ def process_segment(segment, num_of_pieces, current_piece):
 
     x_t = -dz_t / dy_t
 
-    x_t = x_t.subs(t, num_of_pieces * t - current_piece)
-    y_t = y_t.subs(t, num_of_pieces * t - current_piece)
-    z_t = z_t.subs(t, num_of_pieces * t - current_piece)
+    # Legacy
+    # x_t = x_t.subs(t, num_of_pieces * t - current_piece)
+    # y_t = y_t.subs(t, num_of_pieces * t - current_piece)
+    # z_t = z_t.subs(t, num_of_pieces * t - current_piece)
 
     # Debug
     # linspace = np.linspace(0, 1/num_of_pieces, 100)
@@ -62,7 +63,6 @@ def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=True):
 
     first_points = []
     last_points = []
-    curve_data = []
     num_of_pieces = 0
     max_left = np.inf
     max_right = -np.inf
@@ -240,36 +240,35 @@ def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=True):
     else:
         adjusted_paths = paths
 
-    # Clear curve_data before processing adjusted paths
-    curve_data.clear()
     # Process adjusted paths
 
     x = []
     y = []
     z = []
     current_piece = 0
-    for path in paths:
+    for path in adjusted_paths:
         for segment in path:
             x_t, y_t, z_t = process_segment(segment, num_of_pieces, current_piece)
             y.append(y_t)
             z.append(z_t)
             x.append(x_t)
             current_piece += 1
+    return x,y,z
 
-    tmp_x = []
-    tmp_y = []
-    tmp_z = []
 
-    for piece in range(0, num_of_pieces):
-        # Use sympy's And to define the condition for each piece
-        condition = sp.And(t > piece/num_of_pieces, t < (piece + 1) / num_of_pieces)
-        tmp_x.append((x[piece], condition))
-        tmp_y.append((y[piece], condition))
-        tmp_z.append((z[piece], condition))
+    # Legacy code
+    # tmp_x = []
+    # tmp_y = []
+    # tmp_z = []
+    # for piece in range(0, num_of_pieces):
+    #     # Use sympy's And to define the condition for each piece
+    #     condition = sp.And(t > piece/num_of_pieces, t < (piece + 1) / num_of_pieces)
+    #     tmp_x.append((x[piece], condition))
+    #     tmp_y.append((y[piece], condition))
+    #     tmp_z.append((z[piece], condition))
+    # # Now directly create the Piecewise function
+    # piecewise_x = sp.Piecewise(*tmp_x)
+    # piecewise_y = sp.Piecewise(*tmp_y)
+    # piecewise_z = sp.Piecewise(*tmp_z)
 
-    # Now directly create the Piecewise function
-    piecewise_x = sp.Piecewise(*tmp_x)
-    piecewise_y = sp.Piecewise(*tmp_y)
-    piecewise_z = sp.Piecewise(*tmp_z)
-
-    return piecewise_x, piecewise_y, piecewise_z
+    # return piecewise_x, piecewise_y, piecewise_z

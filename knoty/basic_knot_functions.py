@@ -33,6 +33,7 @@ def get_basis(matrix, x_val, y_val, z_val):
     basis2_evaluated = np.array([substitute_if_symbolic(el, substitutions) for el in basis2], dtype=float)
 
     return basis1_evaluated, basis2_evaluated
+
 def plot_plane(x, y, z, form, alpha, surfcolor='blue', plot_radius=0.1):
     """
     Plots a surface in R3 at a specific coordinate (x, y, z) spanned by two vectors (v1, v2) using K3D-Jupyter.
@@ -91,7 +92,7 @@ def plot_contact_structure(plot, form = [0, 'x', 1], grid_size = 1.2, step = 0.5
     return plot
 
 
-def plot_knot(plot, knot, resolution=200, domain = [0,2 * np.pi]):
+def plot_knot(plot, knot, resolution=200, domain = [0,1]):
     """
     Takes in a 3D matplotlib plot and a sympy equation of a knot and draws the knot onto the plot.
     
@@ -99,31 +100,36 @@ def plot_knot(plot, knot, resolution=200, domain = [0,2 * np.pi]):
     :knot: Function that takes a sympy Symbol and returns a tuple of sympy expressions (x, y, z)
     :resolution: Sets the number of points on which the knot equation is evaluated. Default value is 200
     """
-    linspace = np.linspace(domain[0], domain[1], resolution)
-    x, y, z = [], [], []
     
     # Differentiate between parameterized and drawn knots
     try:
-        knot[0].free_symbols
+        len(knot[0])
     except:
+        linspace = np.linspace(domain[0], domain[1], resolution)
+        x, y, z = [], [], []
         t = sp.symbols('t')  # Define the symbolic variable
         for tval in linspace:
             x.append(knot(t)[0].subs(t, tval).evalf())
             y.append(knot(t)[1].subs(t, tval).evalf())
             z.append(knot(t)[2].subs(t, tval).evalf())
+        vertices = np.vstack([x,y,z]).T
+        plot += k3d.line(vertices)
     else:
+        linspace = np.linspace(domain[0], domain[1], resolution)
         t = sp.symbols('t')  # Define the symbolic variable
-        for tval in linspace:
-            x.append(knot[0].subs(t, tval).evalf())
-            y.append(knot[1].subs(t, tval).evalf())
-            z.append(knot[2].subs(t, tval).evalf())
+        for i in range(0,len(knot[0])):
+            x, y, z = [], [], []
+            for tval in linspace:
+                x.append(knot[0][i].subs(t, tval).evalf())
+                y.append(knot[1][i].subs(t, tval).evalf())
+                z.append(knot[2][i].subs(t, tval).evalf())
+            vertices = np.vstack([x,y,z]).T
+            plot += k3d.line(vertices)
     
     # Plot the knot
-    vertices = np.vstack([x,y,z]).T
-    plot += k3d.line(vertices)
     return plot
 
-def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, height_limit = 0.3, alpha = 0.5, color = 'red', domain = [0,2 * np.pi] ):
+def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, height_limit = 0.3, alpha = 0.5, color = 'red', domain = [0,1] ):
     """
     Takes in a 3D matplotlib plot and a sympy equation of a knot and draws contact planes along the knot
 
@@ -132,28 +138,34 @@ def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, hei
     :n: Sets the number of contact planes drawn. Default is 50
     :form: Sets the contact form that isto be visualized. Default is the standard CS on R3
     """
-    linspace = np.linspace(domain[0], domain[1], n)
-    x, y, z = [], [], []
 
     # Differentiate between parameterized and drawn knots
     try:
-        knot[0].free_symbols
+        len(knot[0])
     except:
         t = sp.symbols('t')  # Define the symbolic variable
+        linspace = np.linspace(domain[0], domain[1], n)
+        x, y, z = [], [], []
         for tval in linspace:
             x.append(knot(t)[0].subs(t, tval).evalf())
             y.append(knot(t)[1].subs(t, tval).evalf())
             z.append(knot(t)[2].subs(t, tval).evalf())
+        # Call plot_plane for these points
+        for xi, yi, zi in zip(x,y,z):
+            plot += plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
     else:
+        linspace = np.linspace(domain[0], domain[1], n)
         t = sp.symbols('t')  # Define the symbolic variable
-        for tval in linspace:
-            x.append(knot[0].subs(t, tval).evalf())
-            y.append(knot[1].subs(t, tval).evalf())
-            z.append(knot[2].subs(t, tval).evalf())
+        for i in range(0,len(knot[0])):
+            x, y, z = [], [], []
+            for tval in linspace:
+                x.append(knot[0][i].subs(t, tval).evalf())
+                y.append(knot[1][i].subs(t, tval).evalf())
+                z.append(knot[2][i].subs(t, tval).evalf())
+            # Call plot_plane for these points
+            for xi, yi, zi in zip(x,y,z):
+                plot += plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
 
-    # Call plot_plane for these points
-    for xi, yi, zi in zip(x,y,z):
-        plot += plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
 
     return plot
 
