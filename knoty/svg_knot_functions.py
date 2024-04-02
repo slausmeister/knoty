@@ -10,7 +10,7 @@ def distance(point1, point2):
 
 
 # Function to process each segment
-def process_segment(segment, num_of_pieces, current_piece):
+def process_segment(segment):
     t = sp.symbols("t")
     if isinstance(segment, CubicBezier):
         # Extract real and imaginary parts of control points
@@ -56,7 +56,7 @@ def process_segment(segment, num_of_pieces, current_piece):
     # plt.show()
     return x_t, y_t, z_t
 
-def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=True):
+def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=False, scaling_factor = 1):
     paths, _ = svg2paths(svg_file)
 
     paths = [path for path in paths if path]
@@ -103,15 +103,15 @@ def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=True):
     # print(f"Top:   {max_top}")
     # print(f"Bottom {max_bottom}")
 
+    hori_correction = 0.5 * (max_right - max_left)
+    vert_correction = 0.5 * (max_top - max_bottom)
+
+    scalar = scaling_factor * 1 / max([max_bottom, max_top, max_left, max_right])
+
+    # print(f"Horizontal correction: {hori_correction}")
+    # print(f"Vertical correction: {vert_correction}")
+    # print(f"Scalar: {scalar}")
     if scaling:
-        hori_correction = 0.5 * (max_right - max_left)
-        vert_correction = 0.5 * (max_top - max_bottom)
-
-        scalar = 1 / max([max_bottom, max_top, max_left, max_right])
-
-        # print(f"Horizontal correction: {hori_correction}")
-        # print(f"Vertical correction: {vert_correction}")
-        # print(f"Scalar: {scalar}")
         for path in paths:
             for i in range(len(path)):
                 segment = path[i]
@@ -126,42 +126,8 @@ def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=True):
 
                 end = complex(scalar * (segment.end.real - hori_correction),
                     scalar * (segment.end.imag - vert_correction))
-                
+
                 path[i] = CubicBezier(start, control1, control2, end)
-
-        max_left = np.inf
-        max_right = -np.inf
-        max_top = -np.inf
-        max_bottom = np.inf
-
-        for path in paths:
-            for segment in path:
-                if segment.start.real < max_left: max_left = segment.start.real
-                if segment.control1.real < max_left: max_left = segment.control1.real
-                if segment.control2.real < max_left: max_left = segment.control2.real
-                if segment.end.real < max_left: max_left = segment.end.real
-
-                if segment.start.real > max_right: max_right = segment.start.real
-                if segment.control1.real > max_right: max_right = segment.control1.real
-                if segment.control2.real > max_right: max_right = segment.control2.real
-                if segment.end.real > max_right: max_right = segment.end.real
-
-                if segment.start.imag < max_bottom: max_bottom = segment.start.imag
-                if segment.control1.imag < max_bottom: max_bottom = segment.control1.imag
-                if segment.control2.imag < max_bottom: max_bottom = segment.control2.imag
-                if segment.end.imag < max_bottom: max_bottom = segment.end.imag
-
-                if segment.start.imag > max_top: max_top = segment.start.imag
-                if segment.control1.imag > max_top: max_top = segment.control1.imag
-                if segment.control2.imag > max_top: max_top = segment.control2.imag
-                if segment.end.imag > max_top: max_top = segment.end.imag
-        
-
-        # print(f"Left:  {max_left}")
-        # print(f"Right: {max_right}")
-        # print(f"Top:   {max_top}")
-        # print(f"Bottom {max_bottom}")
-
 
 
     if correction:
@@ -245,14 +211,12 @@ def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=True):
     x = []
     y = []
     z = []
-    current_piece = 0
     for path in adjusted_paths:
         for segment in path:
-            x_t, y_t, z_t = process_segment(segment, num_of_pieces, current_piece)
+            x_t, y_t, z_t = process_segment(segment)
             y.append(y_t)
             z.append(z_t)
             x.append(x_t)
-            current_piece += 1
     return x,y,z
 
 
