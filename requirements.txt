@@ -1,6 +1,6 @@
 numpy>=1.15.0
 sympy>=1.4.0
-k3d>=2.13.0
+k3d>=2.16.0
 svgpathtools>=1.4.0
 
 # Optional dependencies for optional
