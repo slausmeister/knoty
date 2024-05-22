@@ -155,6 +155,7 @@ def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, hei
         # Call plot_plane for these points
         for xi, yi, zi in zip(x,y,z):
             plot += _plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
+            return plot
     else:
         linspace = np.linspace(domain[0], domain[1], n)
         t = sp.symbols('t')  # Define the symbolic variable
@@ -167,5 +168,6 @@ def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, hei
             # Call plot_plane for these points
             for xi, yi, zi in zip(x,y,z):
                 plot += _plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
+                return plot
 
 
