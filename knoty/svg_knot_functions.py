@@ -1,16 +1,14 @@
 import numpy as np
-import math
 import sympy as sp
 from svgpathtools import svg2paths, CubicBezier, QuadraticBezier, Line, Path
-import matplotlib.pyplot as plt
 
 
-def distance(point1, point2):
+def _distance(point1, point2):
     return np.sqrt((point1.real - point2.real) ** 2 + (point1.imag - point2.imag) ** 2)
 
 
 # Function to process each segment
-def process_segment(segment):
+def _process_segment(segment):
     t = sp.symbols("t")
     if isinstance(segment, CubicBezier):
         # Extract real and imaginary parts of control points
@@ -32,7 +30,7 @@ def process_segment(segment):
         # Linear interpolation for y(t) and z(t)
         start_y, start_z = segment.start.real, -segment.start.imag
         end_y, end_z = segment.end.real, -segment.end.imag
-        
+
         y_t = (1 - t) * start_y + t * end_y
         z_t = (1 - t) * start_z + t * end_z
         dy_t = end_y - start_y
@@ -138,25 +136,25 @@ def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=False, sca
                     continue  # Skip comparing the same path or with empty paths
 
                 # Adjust start points with other start points
-                if distance(first_points[i], first_points[j]) < threshold and distance(first_points[i], first_points[j]) > 1e-6:
+                if _distance(first_points[i], first_points[j]) < threshold and _distance(first_points[i], first_points[j]) > 1e-6:
                     avg_point = (first_points[i] + first_points[j]) / 2
                     print("Correcting start point", first_points[i].conjugate(), " and start point", first_points[j].conjugate(), " to ", avg_point.conjugate())
                     first_points[i], first_points[j] = avg_point, avg_point
 
                 # Adjust end points with other end points
-                if distance(last_points[i], last_points[j]) < threshold and distance(last_points[i], last_points[j]) > 1e-6:
+                if _distance(last_points[i], last_points[j]) < threshold and _distance(last_points[i], last_points[j]) > 1e-6:
                     avg_point = (last_points[i] + last_points[j]) / 2
                     print("Correcting end point", last_points[i].conjugate(), " and end point", last_points[j].conjugate(), " to ", avg_point.conjugate())
                     last_points[i], last_points[j] = avg_point, avg_point
 
                 # Adjust start points with other end points
-                if distance(first_points[i], last_points[j]) < threshold and distance(first_points[i], last_points[j]) > 1e-6:
+                if _distance(first_points[i], last_points[j]) < threshold and _distance(first_points[i], last_points[j]) > 1e-6:
                     avg_point = (first_points[i] + last_points[j]) / 2
                     print("Correcting start point", first_points[i].conjugate(), " and end point", last_points[j].conjugate(), " to ", avg_point.conjugate())
                     first_points[i], last_points[j] = avg_point, avg_point
 
                 # Adjust end points with other start points
-                if distance(last_points[i], first_points[j]) < threshold and distance(last_points[i], first_points[j]) > 1e-6:
+                if _distance(last_points[i], first_points[j]) < threshold and _distance(last_points[i], first_points[j]) > 1e-6:
                     avg_point = (last_points[i] + first_points[j]) / 2
                     print("Correcting end point", last_points[i].conjugate(), " and start point", first_points[j].conjugate(), " to ", avg_point.conjugate())
                     last_points[i], first_points[j] = avg_point, avg_point
@@ -169,40 +167,40 @@ def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=False, sca
             for i, segment in enumerate(path):
                 is_first_segment = i == 0
                 is_last_segment = i == len(path) - 1
-        
+
                 if is_first_segment:
                     # Adjusting the first segment of each path
                     if isinstance(segment, CubicBezier):
                         new_control1 = complex(segment.control1.real, first_points[path_index].imag)
                         # print("First adjusted: ", first_points[path_index])
-                        new_segment = CubicBezier(start=first_points[path_index], 
-                                                  control1=new_control1, 
-                                                  control2=segment.control2, 
+                        new_segment = CubicBezier(start=first_points[path_index],
+                                                  control1=new_control1,
+                                                  control2=segment.control2,
                                                   end=segment.end if not is_last_segment else last_points[path_index])
                     elif isinstance(segment, Line):
                         new_segment = Line(start=first_points[path_index], end=segment.end if not is_last_segment else last_points[path_index])
                     new_path.append(new_segment)
-        
+
                 if is_last_segment and not is_first_segment:
                     # Adjusting the last segment of each path, but only if it's not also the first segment
                     if isinstance(segment, CubicBezier):
                         new_control2 = complex(segment.control2.real, last_points[path_index].imag)
                         # print("Last adjusted: ", last_points[path_index])
-                        new_segment = CubicBezier(start=segment.start, 
-                                                  control1=segment.control1, 
-                                                  control2=new_control2, 
+                        new_segment = CubicBezier(start=segment.start,
+                                                  control1=segment.control1,
+                                                  control2=new_control2,
                                                   end=last_points[path_index])  # Adjusted end point
                     elif isinstance(segment, Line):
                         new_segment = Line(start=segment.start, end=last_points[path_index])  # Adjusted end point
                     new_path.append(new_segment)
-        
+
                 if not is_first_segment and not is_last_segment:
                     # For all other segments
                     new_path.append(segment)
-        
+
             adjusted_paths.append(Path(*new_path))
             path_index += 1
-        
+
     else:
         adjusted_paths = paths
 
@@ -213,7 +211,7 @@ def import_from_svg(svg_file, correction=True, threshold=0.1, scaling=False, sca
     z = []
     for path in adjusted_paths:
         for segment in path:
-            x_t, y_t, z_t = process_segment(segment)
+            x_t, y_t, z_t = _process_segment(segment)
             y.append(y_t)
             z.append(z_t)
             x.append(x_t)

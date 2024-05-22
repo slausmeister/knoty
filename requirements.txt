@@ -1,0 +1,5 @@
+numpy>=1.15.0
+sympy>=1.4.0
+
+# Optional dependencies for optional
+svgpathtools>=1.4.0

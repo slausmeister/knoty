@@ -2,7 +2,7 @@ import numpy as np
 import sympy as sp
 import k3d
 
-def get_basis(matrix, x_val, y_val, z_val):
+def _get_basis(matrix, x_val, y_val, z_val):
     """
     This function takes in a one form and a point in R3 and calculates the basis of the kernel
 
@@ -34,10 +34,10 @@ def get_basis(matrix, x_val, y_val, z_val):
 
     return basis1_evaluated, basis2_evaluated
 
-def plot_plane(x, y, z, form, alpha, surfcolor='blue', plot_radius=0.1):
+def _plot_plane(x, y, z, form, alpha, surfcolor='blue', plot_radius=0.1):
     """
     Plots a surface in R3 at a specific coordinate (x, y, z) spanned by two vectors (v1, v2) using K3D-Jupyter.
-    
+
     Parameters:
     - x, y, z: The coordinates where the surface originates.
     - v1, v2: The vectors spanning the surface.
@@ -47,7 +47,7 @@ def plot_plane(x, y, z, form, alpha, surfcolor='blue', plot_radius=0.1):
     - alpha: The transparency of the surface.
     """
 
-    v1, v2 = get_basis(form, x, y, z)
+    v1, v2 = _get_basis(form, x, y, z)
 
     # Create a grid on the plane
     u, v = np.meshgrid(np.linspace(-plot_radius, plot_radius, 2), np.linspace(-plot_radius, plot_radius, 2))
@@ -56,10 +56,10 @@ def plot_plane(x, y, z, form, alpha, surfcolor='blue', plot_radius=0.1):
     plane_z = z + u * v1[2] + v * v2[2]
 
     # Clip the z-values to be within the height_limit
-    
+
     # Flatten the x, y, z coordinates for K3D
     vertices = np.vstack([plane_x.ravel(), plane_y.ravel(), plane_z.ravel()]).T.astype(np.float32)
-    
+
     # Generate indices for the triangles
     indices = []
     for i in range(vertices.shape[0] - np.sqrt(vertices.shape[0]).astype(int) - 1):
@@ -67,8 +67,8 @@ def plot_plane(x, y, z, form, alpha, surfcolor='blue', plot_radius=0.1):
             indices.append([i, i + 1, i + np.sqrt(vertices.shape[0]).astype(int)])
             indices.append([i + 1, i + 1 + np.sqrt(vertices.shape[0]).astype(int), i + np.sqrt(vertices.shape[0]).astype(int)])
     indices = np.array(indices).astype(np.uint32)
-    
-    # Plot the surface 
+
+    # Plot the surface
 
     tmp = k3d.mesh(vertices, indices, opacity=alpha)
     return tmp
@@ -88,19 +88,19 @@ def plot_contact_structure(plot, form = [0, 'x', 1], grid_size = 1.2, step = 0.5
     height_limit=0.3
     for x in np.arange(-grid_size, grid_size + step, step):
         for y in np.arange(-grid_size, grid_size + step, step):
-            plot +=plot_plane(x, y, 0, form, alpha, plot_radius=size)
+            plot += _plot_plane(x, y, 0, form, alpha, plot_radius=size)
     return plot
 
 
 def plot_knot(plot, knot, resolution=200, domain = [0,1]):
     """
     Takes in a 3D matplotlib plot and a sympy equation of a knot and draws the knot onto the plot.
-    
+
     :ax: 3D matplotlib plot
     :knot: Function that takes a sympy Symbol and returns a tuple of sympy expressions (x, y, z)
     :resolution: Sets the number of points on which the knot equation is evaluated. Default value is 200
     """
-    
+
     # Differentiate between parameterized and drawn knots
     try:
         len(knot[0])
@@ -125,9 +125,11 @@ def plot_knot(plot, knot, resolution=200, domain = [0,1]):
                 z.append(knot[2][i].subs(t, tval).evalf())
             vertices = np.vstack([x,y,z]).T
             plot += k3d.line(vertices)
-    
+
     # Plot the knot
     return plot
+
+
 
 def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, height_limit = 0.3, alpha = 0.5, color = 'red', domain = [0,1] ):
     """
@@ -152,7 +154,7 @@ def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, hei
             z.append(knot(t)[2].subs(t, tval).evalf())
         # Call plot_plane for these points
         for xi, yi, zi in zip(x,y,z):
-            plot += plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
+            plot += _plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
     else:
         linspace = np.linspace(domain[0], domain[1], n)
         t = sp.symbols('t')  # Define the symbolic variable
@@ -164,32 +166,6 @@ def plot_planes_along_knot(plot, knot, n=50, form = [0, 'x', 1], size = 0.1, hei
                 z.append(knot[2][i].subs(t, tval).evalf())
             # Call plot_plane for these points
             for xi, yi, zi in zip(x,y,z):
-                plot += plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
+                plot += _plot_plane(xi, yi, zi, form, alpha, surfcolor=color, plot_radius=size)
 
 
-    return plot
-
-def find_vanishing_cusps(knot):
-    """
-    WIP function. Takes in a Knot and calculates the coordinates of all cusps. Currently working.
-    """
-    t = sp.symbols('t')
-    x, y, z = knot(t)
-
-    # Differentiate y and z with respect to t
-    dy_dt = sp.diff(y, t)
-    dz_dt = sp.diff(z, t)
-
-    # Solve for points where derivatives vanish
-    vanishing_points_y = [sp.N(sol) for sol in sp.solve(dy_dt, t)]
-    vanishing_points_z = [sp.N(sol) for sol in sp.solve(dz_dt, t)]
-
-    # Find intersections considering the tolerance
-    intersection = set(vanishing_points_y) & set(vanishing_points_z)
-
-
-    x = [knot(t)[0].evalf() for t in intersection]
-    y = [knot(t)[1].evalf() for t in intersection]
-    z = [knot(t)[2].evalf() for t in intersection]
-
-    return x, y, z
