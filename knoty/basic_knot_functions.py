@@ -92,38 +92,37 @@ def plot_contact_structure(plot, form = [0, 'x', 1], grid_size = 1.2, step = 0.5
     return plot
 
 
-def plot_knot(plot, knot, resolution=200, domain = [0,1]):
+def plot_knot(plot, knot, resolution=200, domain=[0, 1]):
     """
     Takes in a 3D matplotlib plot and a sympy equation of a knot and draws the knot onto the plot.
 
-    :ax: 3D matplotlib plot
-    :knot: Function that takes a sympy Symbol and returns a tuple of sympy expressions (x, y, z)
+    :plot: 3D matplotlib plot
+    :knot: Function that takes a sympy Symbol and returns a tuple of sympy expressions (x, y, z) or a list of such functions
     :resolution: Sets the number of points on which the knot equation is evaluated. Default value is 200
+    :domain: The domain over which to evaluate the knot function. Default is [0, 1]
     """
 
-    # Differentiate between parameterized and drawn knots
-    try:
-        len(knot[0])
-    except:
-        linspace = np.linspace(domain[0], domain[1], resolution)
+    linspace = np.linspace(domain[0], domain[1], resolution)
+    t = sp.symbols('t')  # Define the symbolic variable
+
+    if callable(knot):  # Check if knot is a function
         x, y, z = [], [], []
-        t = sp.symbols('t')  # Define the symbolic variable
         for tval in linspace:
-            x.append(knot(t)[0].subs(t, tval).evalf())
-            y.append(knot(t)[1].subs(t, tval).evalf())
-            z.append(knot(t)[2].subs(t, tval).evalf())
-        vertices = np.vstack([x,y,z]).T
+            x_val, y_val, z_val = knot(t)
+            x.append(x_val.subs(t, tval).evalf())
+            y.append(y_val.subs(t, tval).evalf())
+            z.append(z_val.subs(t, tval).evalf())
+        vertices = np.vstack([x, y, z]).T
         plot += k3d.line(vertices)
-    else:
-        linspace = np.linspace(domain[0], domain[1], resolution)
-        t = sp.symbols('t')  # Define the symbolic variable
-        for i in range(0,len(knot[0])):
+
+    else:  # Assume knot is a list of functions
+        for i in range(len(knot[0])):
             x, y, z = [], [], []
             for tval in linspace:
                 x.append(knot[0][i].subs(t, tval).evalf())
                 y.append(knot[1][i].subs(t, tval).evalf())
                 z.append(knot[2][i].subs(t, tval).evalf())
-            vertices = np.vstack([x,y,z]).T
+            vertices = np.vstack([x, y, z]).T
             plot += k3d.line(vertices)
 
     # Plot the knot
